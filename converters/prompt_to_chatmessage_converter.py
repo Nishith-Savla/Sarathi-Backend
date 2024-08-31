@@ -6,7 +6,7 @@ from haystack.dataclasses import ChatMessage
 
 @component
 class PromptToChatMessage:
-    def __init__(self, prompt: str, message_list: List[ChatMessage]):
+    def __init__(self, prompt: str):
         """
         Initialize the PromptToChatMessageConverter component.
 
@@ -14,7 +14,6 @@ class PromptToChatMessage:
             The prompt to convert to a chat message.
         """
         self.prompt = prompt
-        self.message_list = message_list
 
     def to_dict(self):
         """
@@ -40,13 +39,19 @@ class PromptToChatMessage:
             message_list=[ChatMessage.from_dict(message) for message in data["message_list"]]
         )
 
-    @component.output_types(chat_messages=List[ChatMessage])
-    def run(self, prompt: str) -> Dict[str, List[ChatMessage]]:
+    @component.output_types(message_list=List[ChatMessage])
+    def run(self, prompt: str, message_list: List[ChatMessage], role: str) -> Dict[str, List[ChatMessage]]:
         """
         Convert a prompt to a chat message.
 
         :param prompt: The prompt to convert to a chat message.
         :returns: A list of chat messages.
         """
-        self.message_list.append(ChatMessage.from_system(content=prompt))
-        return {"chat_messages": self.message_list}
+        message_type = {
+            "user": ChatMessage.from_user,
+            "assistant": ChatMessage.from_assistant,
+            "system": ChatMessage.from_system,
+        }
+
+
+        return {"message_list": [*message_list, message_type[role](content=prompt)]}

@@ -76,7 +76,7 @@ from mongo_client import MongoDBClient
 
 class RAGService:
     def __init__(self, env_var_name: str, prompt: str, system_prompt: str = None, output_schema: dict[str, Any] = None,
-                 model: str = "gemini-1.5-pro", generation_config: dict[str, Any] = None):
+                 model: str = "gemini-1.5-flash", generation_config: dict[str, Any] = None):
         self.api_key = Secret.from_env_var(env_var_name)
         self.prompt = prompt
         self.document_store = WeaviateDocumentStore(url="http://127.0.0.1:8080")

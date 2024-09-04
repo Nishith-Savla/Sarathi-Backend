@@ -38,8 +38,8 @@ class MongoDBClient:
         booking = {
             "userId": user_id,
             "eventId": event_id,
-            "price": price,
-            "numberOfTickets": number_of_tickets,
+            "amount": price,
+            "numberOfAdultTickets": number_of_tickets,
             "srCitizenTickets": sr_citizen_tickets,
             "childTickets": child_tickets,
             "studentTickets": student_tickets,

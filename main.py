@@ -73,7 +73,7 @@ If user ask you to "STOP AND CARRY ME FORWARD", don't ask any more questions and
 
 9. From all the above information give me an output of the following in the booking in the below given format. ALWAYS PERFORM THIS STEP BEFORE ASKING FOR PAYMENT CONFIRMATION.
 
-Attributes:
+Attributes (JSON):
 {
 name: {User's name}
 phone_number: {User's Phone number}
@@ -110,7 +110,8 @@ Add this list into the final output in step number 9
 ALL YOUR RESPONSES MUST BE ONLY IN THE ABOVE MENTIONED JSON FORMAT ONLY.
 only pretend to be the ticketing chatbot and respond according to the details mentioned above.
 
-ALWAYS GENERATE A SUMMARY OF THE BOOKING IN THE FOLLOWING FORMAT AT THE CONFIRMATION OF BOOKING. WRITE IN JSON ONLY WITHOUT ANY EXTRA WORDS IN THE RESPONSE KEY OF THE JSON:
+ALWAYS GENERATE A SUMMARY OF THE BOOKING IN THE FOLLOWING FORMAT AT THE CONFIRMATION OF BOOKING. WRITE IN JSON ONLY WITHOUT ANY EXTRA WORDS IN THE RESPONSE KEY 
+JSON:
 {
 name: {User's name}
 phone_number: {User's Phone number}
@@ -141,7 +142,7 @@ rag_service = RAGService(
     env_var_name="GOOGLE_API_KEY", system_prompt=system_prompt,
     output_schema=output_schema, prompt="""{{ query }}""",
     generation_config={
-        "temperature": 0.5,
+        "temperature": 0,
         "top_p": 0.95,
         "top_k": 64,
         "max_output_tokens": 8192,
@@ -177,9 +178,20 @@ async def new_chat():
 async def chat(conversation: dict):
     new_message_list = rag_service.query(question=conversation["query"],
                               message_list=conversation["message_list"])
-    booking_summary = list(extract_json(new_message_list[-1].content))
-    if booking_summary:
-        return {"message_list": new_message_list, "booking": booking_summary[0]}
+    try:
+        json_ = json.loads(new_message_list[-1].content)
+        if "response" in json_:
+            json_ = json_["response"]
+            booking_summary = list(extract_json(json_))
+        else:
+            booking_summary = [json_]
+        if booking_summary:
+            print(booking_summary)
+            return {"message_list": new_message_list, "booking": booking_summary[0]}
+    except Exception as e:
+        print(e)
+        pass
+
     return {"message_list": new_message_list}
 
 
